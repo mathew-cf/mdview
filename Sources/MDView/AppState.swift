@@ -37,16 +37,18 @@ class AppState: ObservableObject {
         }
     }
 
-    func loadFile(_ url: URL) {
+    func loadFile(_ url: URL, changeDirectory: Bool = true) {
         fileURL = url
         fileName = url.lastPathComponent
         readFile()
         startWatching()
 
-        let parentDir = url.deletingLastPathComponent()
-        if directoryURL?.path != parentDir.path {
-            directoryURL = parentDir
-            markdownFiles = DirectoryScanner.scan(parentDir)
+        if changeDirectory {
+            let parentDir = url.deletingLastPathComponent()
+            if directoryURL?.path != parentDir.path {
+                directoryURL = parentDir
+                markdownFiles = DirectoryScanner.scan(parentDir)
+            }
         }
     }
 

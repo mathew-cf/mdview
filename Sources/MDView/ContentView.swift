@@ -30,7 +30,7 @@ struct ContentView: View {
                     isPresented: $appState.isQuickOpenVisible,
                     files: appState.markdownFiles,
                     directoryURL: appState.directoryURL,
-                    onSelect: { appState.loadFile($0) }
+                    onSelect: { appState.loadFile($0, changeDirectory: false) }
                 )
                 .padding(.top, 40)
                 .transition(.opacity.combined(with: .move(edge: .top)))
