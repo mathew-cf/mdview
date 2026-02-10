@@ -7,7 +7,10 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "MDView",
-            path: "Sources/MDView"
+            path: "Sources/MDView",
+            resources: [
+                .copy("Resources")
+            ]
         )
     ]
 )

@@ -36,6 +36,21 @@ for {
 }
 ```
 
+## Architecture
+
+```mermaid
+flowchart LR
+    A[HTTP Ingest] -->|publish| B(NATS JetStream)
+    B -->|consume| C[Validation]
+    C -->|publish| B
+    B -->|consume| D[Enrichment]
+    D -->|publish| B
+    B -->|consume| E[Storage]
+    E --> F[(Object Store)]
+    C -.->|failures| G[DLQ]
+    D -.->|failures| G
+```
+
 ## Consequences
 
 - Stages scale independently — validation autoscales without affecting ingest

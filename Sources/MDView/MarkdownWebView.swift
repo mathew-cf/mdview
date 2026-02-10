@@ -10,6 +10,27 @@ struct MarkdownWebView: NSViewRepresentable {
         Coordinator()
     }
 
+    private static let stageDir: URL = {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("mdview")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+
+        let htmlFile = dir.appendingPathComponent("index.html")
+        try? HTMLTemplate.html.write(to: htmlFile, atomically: true, encoding: .utf8)
+
+        if let resourceDir = Bundle.module.resourceURL {
+            let fm = FileManager.default
+            let resources = (try? fm.contentsOfDirectory(atPath: resourceDir.path)) ?? []
+            for file in resources {
+                let src = resourceDir.appendingPathComponent(file)
+                let dst = dir.appendingPathComponent(file)
+                try? fm.removeItem(at: dst)
+                try? fm.copyItem(at: src, to: dst)
+            }
+        }
+
+        return dir
+    }()
+
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
         config.preferences.setValue(true, forKey: "developerExtrasEnabled")
@@ -23,14 +44,8 @@ struct MarkdownWebView: NSViewRepresentable {
         context.coordinator.webView = webView
         context.coordinator.baseURL = baseURL
 
-        if baseURL != nil {
-            let tmpDir = FileManager.default.temporaryDirectory
-            let tmpFile = tmpDir.appendingPathComponent("mdview-template.html")
-            try? HTMLTemplate.html.write(to: tmpFile, atomically: true, encoding: .utf8)
-            webView.loadFileURL(tmpFile, allowingReadAccessTo: URL(fileURLWithPath: "/"))
-        } else {
-            webView.loadHTMLString(HTMLTemplate.html, baseURL: nil)
-        }
+        let htmlFile = Self.stageDir.appendingPathComponent("index.html")
+        webView.loadFileURL(htmlFile, allowingReadAccessTo: URL(fileURLWithPath: "/"))
         return webView
     }
 
