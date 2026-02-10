@@ -56,6 +56,23 @@ struct MDViewApp: App {
                     appState.reload()
                 }
                 .keyboardShortcut("r")
+
+                Divider()
+
+                Button("Zoom In") {
+                    appState.zoomIn()
+                }
+                .keyboardShortcut("+")
+
+                Button("Zoom Out") {
+                    appState.zoomOut()
+                }
+                .keyboardShortcut("-")
+
+                Button("Actual Size") {
+                    appState.resetZoom()
+                }
+                .keyboardShortcut("0")
             }
         }
         .defaultSize(width: 820, height: 700)

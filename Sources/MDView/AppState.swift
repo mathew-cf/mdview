@@ -9,6 +9,11 @@ class AppState: ObservableObject {
     @Published var directoryURL: URL?
     @Published var markdownFiles: [URL] = []
     @Published var isQuickOpenVisible = false
+    @Published var zoomLevel: Double = 1.0
+
+    private static let zoomStep = 0.1
+    private static let minZoom = 0.5
+    private static let maxZoom = 3.0
 
     private var fileWatcher: FileWatcher?
 
@@ -70,6 +75,18 @@ class AppState: ObservableObject {
         withAnimation(.easeOut(duration: 0.15)) {
             isQuickOpenVisible = true
         }
+    }
+
+    func zoomIn() {
+        zoomLevel = min(zoomLevel + Self.zoomStep, Self.maxZoom)
+    }
+
+    func zoomOut() {
+        zoomLevel = max(zoomLevel - Self.zoomStep, Self.minZoom)
+    }
+
+    func resetZoom() {
+        zoomLevel = 1.0
     }
 
     func reload() {

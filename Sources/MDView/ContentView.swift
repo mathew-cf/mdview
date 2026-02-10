@@ -9,7 +9,8 @@ struct ContentView: View {
                 if appState.fileURL != nil {
                     MarkdownWebView(
                         markdown: appState.markdownContent,
-                        baseURL: appState.fileURL?.deletingLastPathComponent()
+                        baseURL: appState.fileURL?.deletingLastPathComponent(),
+                        zoomLevel: appState.zoomLevel
                     )
                 } else {
                     emptyState

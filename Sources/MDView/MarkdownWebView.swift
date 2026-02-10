@@ -4,6 +4,7 @@ import WebKit
 struct MarkdownWebView: NSViewRepresentable {
     let markdown: String
     let baseURL: URL?
+    let zoomLevel: Double
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -16,6 +17,8 @@ struct MarkdownWebView: NSViewRepresentable {
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
         webView.setValue(false, forKey: "drawsBackground")
+        webView.allowsMagnification = true
+        webView.pageZoom = zoomLevel
         context.coordinator.webView = webView
 
         webView.loadHTMLString(HTMLTemplate.html, baseURL: baseURL)
@@ -24,6 +27,9 @@ struct MarkdownWebView: NSViewRepresentable {
 
     func updateNSView(_ webView: WKWebView, context: Context) {
         context.coordinator.updateContent(markdown)
+        if webView.pageZoom != zoomLevel {
+            webView.pageZoom = zoomLevel
+        }
     }
 
     class Coordinator: NSObject, WKNavigationDelegate {
