@@ -1,6 +1,6 @@
 # MDView
 
-A lightweight macOS app for reading Markdown files. Renders `.md` files with GitHub-flavored styling, syntax-highlighted code blocks, and live reload on file changes.
+A lightweight macOS app for reading Markdown files. Renders `.md` files with GitHub-flavored styling, syntax-highlighted code blocks, Mermaid diagrams, and live reload on file changes.
 
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-blue)
 ![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange)
@@ -18,6 +18,7 @@ A lightweight macOS app for reading Markdown files. Renders `.md` files with Git
 - **Directory-aware** -- open a folder to browse all its Markdown files
 - **GitHub styling** -- light and dark themes that follow your system appearance
 - **Syntax highlighting** -- fenced code blocks highlighted via highlight.js
+- **Mermaid diagrams** -- fenced `mermaid` blocks rendered as SVG, with light/dark theme support
 - **External links** -- clicked links open in your default browser
 - **No dependencies** -- pure Swift + WebKit, no external packages
 
@@ -67,20 +68,27 @@ Inside the app:
 
 ```
 Sources/MDView/
-  App.swift             # Entry point, menus, CLI arg handling
-  AppState.swift        # Core state: file loading, directory scanning, file watching
-  ContentView.swift     # Main window layout, drag & drop, quick open overlay
-  MarkdownWebView.swift # WKWebView wrapper that renders Markdown via marked.js
-  HTMLTemplate.swift    # Self-contained HTML/CSS/JS (marked.js, highlight.js, GitHub themes)
-  FileWatcher.swift     # DispatchSource-based file system watcher
-  DirectoryScanner.swift# Recursive Markdown file discovery with smart directory skipping
-  FuzzyMatch.swift      # Fuzzy string matching with streak/boundary bonuses
-  QuickOpenView.swift   # Cmd+P palette UI with keyboard navigation
+  App.swift              # Entry point, menus, CLI arg handling
+  AppState.swift         # Core state: file loading, directory scanning, file watching
+  ContentView.swift      # Main window layout, drag & drop, quick open overlay
+  MarkdownWebView.swift  # WKWebView wrapper that renders Markdown via marked.js
+  HTMLTemplate.swift     # HTML shell with inline CSS and JS bootstrap
+  FileWatcher.swift      # DispatchSource-based file system watcher
+  DirectoryScanner.swift # Recursive Markdown file discovery with smart directory skipping
+  FuzzyMatch.swift       # Fuzzy string matching with streak/boundary bonuses
+  QuickOpenView.swift    # Cmd+P palette UI with keyboard navigation
+  Log.swift              # Debug logging (enabled via MDVIEW_DEBUG env var)
+  Resources/
+    marked.min.js        # Markdown parser (marked.js)
+    highlight.min.js     # Syntax highlighting (highlight.js)
+    mermaid.min.js       # Diagram rendering (mermaid.js)
+    github-light.css     # GitHub light theme
+    github-dark.css      # GitHub dark theme
 ```
 
 ## How It Works
 
-Markdown is rendered client-side in a `WKWebView` using [marked.js](https://github.com/markedjs/marked) and [highlight.js](https://github.com/highlightjs/highlight.js). The HTML template, CSS themes, and JS libraries are all embedded in `HTMLTemplate.swift` -- no network requests, no external files.
+Markdown is rendered client-side in a `WKWebView` using [marked.js](https://github.com/markedjs/marked), [highlight.js](https://github.com/highlightjs/highlight.js), and [mermaid.js](https://github.com/mermaid-js/mermaid). The JS libraries and CSS themes live in `Resources/` and are bundled via Swift Package Manager -- no network requests, no external runtime dependencies.
 
 File changes are detected via GCD's `DispatchSource` file system events. When the file is modified, the new content is base64-encoded and sent to the web view via `evaluateJavaScript`.
 
