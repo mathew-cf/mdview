@@ -1447,6 +1447,12 @@ return He}()
             content.style.display = 'block';
         }
 
+        var _baseDir = '';
+
+        window.setBaseDir = function(dir) {
+            _baseDir = dir;
+        };
+
         // Main render function called from Swift via evaluateJavaScript
         window.renderBase64 = function(b64) {
             const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
@@ -1454,6 +1460,15 @@ return He}()
 
             const scrollY = window.scrollY;
             content.innerHTML = marked.parse(text);
+
+            if (_baseDir) {
+                content.querySelectorAll('img').forEach(function(img) {
+                    var src = img.getAttribute('src');
+                    if (src && !src.match(/^(https?:|data:|file:)/i) && !src.startsWith('//')) {
+                        img.src = _baseDir + '/' + src;
+                    }
+                });
+            }
 
             // Syntax-highlight code blocks
             content.querySelectorAll('pre code').forEach(function(block) {
