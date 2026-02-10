@@ -55,15 +55,12 @@ class AppState: ObservableObject {
     func loadDirectory(_ url: URL) {
         directoryURL = url
         markdownFiles = DirectoryScanner.scan(url)
-
-        if fileURL == nil {
-            let readme = markdownFiles.first {
-                $0.lastPathComponent.lowercased().hasPrefix("readme")
-            }
-            if let readme = readme {
-                loadFile(readme)
-            }
-        }
+        fileWatcher?.stop()
+        fileWatcher = nil
+        fileURL = nil
+        markdownContent = ""
+        fileName = url.lastPathComponent
+        showQuickOpen()
     }
 
     func showQuickOpen() {

@@ -60,8 +60,7 @@ struct ContentView: View {
         provider.loadItem(forTypeIdentifier: "public.file-url", options: nil) { data, _ in
             guard
                 let urlData = data as? Data,
-                let path = String(data: urlData, encoding: .utf8),
-                let url = URL(string: path)
+                let url = URL(dataRepresentation: urlData, relativeTo: nil)
             else { return }
 
             Task { @MainActor in
