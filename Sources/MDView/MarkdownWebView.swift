@@ -11,22 +11,36 @@ struct MarkdownWebView: NSViewRepresentable {
     }
 
     private static let stageDir: URL = {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("mdview")
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let fm = FileManager.default
+        let dir = fm.temporaryDirectory.appendingPathComponent("mdview")
+        try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
+
+        Log.debug("stageDir: \(dir.path)")
+        Log.debug("Bundle.module.bundlePath: \(Bundle.module.bundlePath)")
+        Log.debug("Bundle.module.resourceURL: \(Bundle.module.resourceURL?.path ?? "nil")")
 
         let htmlFile = dir.appendingPathComponent("index.html")
         try? HTMLTemplate.html.write(to: htmlFile, atomically: true, encoding: .utf8)
 
         if let resourceDir = Bundle.module.resourceURL {
-            let fm = FileManager.default
-            let resources = (try? fm.contentsOfDirectory(atPath: resourceDir.path)) ?? []
-            for file in resources {
+            let contents = (try? fm.contentsOfDirectory(atPath: resourceDir.path)) ?? []
+            Log.debug("resourceDir contents: \(contents)")
+            for file in contents {
                 let src = resourceDir.appendingPathComponent(file)
                 let dst = dir.appendingPathComponent(file)
                 try? fm.removeItem(at: dst)
-                try? fm.copyItem(at: src, to: dst)
+                do {
+                    try fm.copyItem(at: src, to: dst)
+                    Log.debug("copied \(file)")
+                } catch {
+                    Log.debug("FAILED \(file): \(error)")
+                }
             }
+        } else {
+            Log.debug("resourceURL is nil")
         }
+
+        Log.debug("staged files: \((try? fm.contentsOfDirectory(atPath: dir.path)) ?? [])")
 
         return dir
     }()
@@ -96,7 +110,7 @@ struct MarkdownWebView: NSViewRepresentable {
             let encoded = Data(markdown.utf8).base64EncodedString()
             webView.evaluateJavaScript("renderBase64('\(encoded)')") { _, error in
                 if let error = error {
-                    print("JS error: \(error.localizedDescription)")
+                    Log.debug("JS error: \(error.localizedDescription)")
                 }
             }
         }

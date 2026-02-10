@@ -183,7 +183,7 @@ enum HTMLTemplate {
         mermaid.initialize({
             startOnLoad: false,
             theme: isDark ? 'dark' : 'default',
-            securityLevel: 'loose'
+            securityLevel: 'strict'
         });
 
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
@@ -191,7 +191,7 @@ enum HTMLTemplate {
             mermaid.initialize({
                 startOnLoad: false,
                 theme: isDark ? 'dark' : 'default',
-                securityLevel: 'loose'
+                securityLevel: 'strict'
             });
         });
 
@@ -210,12 +210,23 @@ enum HTMLTemplate {
             _baseDir = dir;
         };
 
+        // Mermaid strict mode doesn't support backslash-n for line breaks
+        // in labels. Replace them with <br/> tags on each source line,
+        // preserving real newlines that separate diagram statements.
+        function mermaidNewlines(src) {
+            var lines = src.split('\\n');
+            for (var i = 0; i < lines.length; i++) {
+                lines[i] = lines[i].replace(/\\\\n/g, '<br/>');
+            }
+            return lines.join('\\n');
+        }
+
         async function renderMermaidBlocks() {
             var blocks = content.querySelectorAll('pre code.language-mermaid');
             for (var i = 0; i < blocks.length; i++) {
                 var block = blocks[i];
                 var pre = block.parentElement;
-                var source = block.textContent;
+                var source = mermaidNewlines(block.textContent);
                 try {
                     var id = 'mermaid-' + (++_mermaidId);
                     var result = await mermaid.render(id, source);
