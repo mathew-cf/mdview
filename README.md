@@ -6,6 +6,10 @@ A lightweight macOS app for reading Markdown files. Renders `.md` files with Git
 ![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 
+<p align="center">
+  <img src="screenshot.png" alt="MDView screenshot" width="600">
+</p>
+
 ## Features
 
 - **Live reload** -- automatically re-renders when the file changes on disk
@@ -55,6 +59,9 @@ Inside the app:
 | `Cmd+O` | Open a file or directory |
 | `Cmd+P` | Quick Open (fuzzy file search) |
 | `Cmd+R` | Reload current file |
+| `Cmd++` | Zoom in |
+| `Cmd+-` | Zoom out |
+| `Cmd+0` | Reset zoom |
 
 ## Project Structure
 
