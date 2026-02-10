@@ -3,7 +3,7 @@ import Foundation
 enum Log {
     private static let enabled = ProcessInfo.processInfo.environment["MDVIEW_DEBUG"] != nil
     private static let path = "/tmp/mdview-debug.log"
-    private static let formatter: ISO8601DateFormatter = {
+    nonisolated(unsafe) private static let formatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         return f
     }()
