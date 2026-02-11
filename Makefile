@@ -16,6 +16,7 @@ bundle: icon
 	cp -R "$(BIN_DIR)/MDView_MDView.bundle" "$(BUNDLE)/Contents/MacOS/"
 	cp Info.plist "$(BUNDLE)/Contents/"
 	@if [ -f "$(ICON_OUT)" ]; then cp "$(ICON_OUT)" "$(BUNDLE)/Contents/Resources/"; fi
+	codesign --force --deep -s - "$(BUNDLE)"
 	@echo "✓ $(BUNDLE) is ready"
 
 icon:

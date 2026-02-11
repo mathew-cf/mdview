@@ -32,12 +32,21 @@ jobs:
       - name: Build .app bundle
         run: make bundle
 
+      - name: Install create-dmg
+        run: brew install create-dmg
+
       - name: Create DMG
         run: |
-          hdiutil create -volname MDView \
-            -srcfolder build/MDView.app \
-            -ov -format UDZO \
-            build/MDView.dmg
+          create-dmg \
+            --volname "MDView" \
+            --window-pos 200 120 \
+            --window-size 660 400 \
+            --icon-size 128 \
+            --icon "MDView.app" 180 190 \
+            --app-drop-link 480 190 \
+            --hide-extension "MDView.app" \
+            build/MDView.dmg \
+            build/MDView.app
 
       - name: Upload release artifacts
         uses: softprops/action-gh-release@v2

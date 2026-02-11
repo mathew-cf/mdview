@@ -24,6 +24,12 @@ A lightweight macOS app for reading Markdown files. Renders `.md` files with Git
 
 ## Install
 
+Download the latest DMG from [Releases](../../releases/latest), open it, and drag MDView to Applications.
+
+Since the app isn't signed with an Apple Developer certificate, macOS will block it on first launch. Right-click the app → **Open** → **Open** to bypass the warning. You only need to do this once.
+
+Alternatively, build from source:
+
 ```sh
 make install
 ```
