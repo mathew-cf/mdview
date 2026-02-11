@@ -13,10 +13,10 @@ bundle: icon
 	swift build -c release
 	@mkdir -p "$(BUNDLE)/Contents/MacOS" "$(BUNDLE)/Contents/Resources"
 	cp "$(BIN_DIR)/$(APP_NAME)" "$(BUNDLE)/Contents/MacOS/"
-	cp -R "$(BIN_DIR)/MDView_MDView.bundle" "$(BUNDLE)/Contents/MacOS/"
+	cp -R "$(BIN_DIR)/MDView_MDView.bundle" "$(BUNDLE)/Contents/Resources/"
 	cp Info.plist "$(BUNDLE)/Contents/"
 	@if [ -f "$(ICON_OUT)" ]; then cp "$(ICON_OUT)" "$(BUNDLE)/Contents/Resources/"; fi
-	codesign --force --deep -s - "$(BUNDLE)"
+	codesign --force -s - "$(BUNDLE)"
 	@echo "✓ $(BUNDLE) is ready"
 
 icon:

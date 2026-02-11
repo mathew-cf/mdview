@@ -1,12 +1,12 @@
 import Foundation
 
-final class FileWatcher {
+actor FileWatcher {
     private let url: URL
-    private let callback: () -> Void
+    private let callback: @Sendable () -> Void
     private var source: DispatchSourceFileSystemObject?
     private var fileDescriptor: Int32 = -1
 
-    init(url: URL, callback: @escaping () -> Void) {
+    init(url: URL, callback: @escaping @Sendable () -> Void) {
         self.url = url
         self.callback = callback
     }
@@ -24,15 +24,9 @@ final class FileWatcher {
         )
 
         source.setEventHandler { [weak self] in
-            guard let self = self else { return }
-            let flags = source.data
-
-            self.callback()
-
-            if flags.contains(.delete) || flags.contains(.rename) || flags.contains(.revoke) {
-                DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + .milliseconds(150)) {
-                    self.start()
-                }
+            let rawFlags = source.data.rawValue
+            Task { [weak self] in
+                await self?.handleEvent(rawFlags: rawFlags)
             }
         }
 
@@ -51,6 +45,18 @@ final class FileWatcher {
     }
 
     deinit {
-        stop()
+        source?.cancel()
+    }
+
+    private func handleEvent(rawFlags: UInt) {
+        callback()
+
+        let flags = DispatchSource.FileSystemEvent(rawValue: rawFlags)
+        if flags.contains(.delete) || flags.contains(.rename) || flags.contains(.revoke) {
+            Task { [weak self] in
+                try? await Task.sleep(for: .milliseconds(150))
+                await self?.start()
+            }
+        }
     }
 }

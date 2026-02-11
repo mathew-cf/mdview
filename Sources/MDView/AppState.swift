@@ -60,7 +60,7 @@ class AppState: ObservableObject {
     func loadDirectory(_ url: URL) {
         directoryURL = url
         markdownFiles = DirectoryScanner.scan(url)
-        fileWatcher?.stop()
+        Task { await fileWatcher?.stop() }
         fileWatcher = nil
         fileURL = nil
         markdownContent = ""
@@ -103,13 +103,14 @@ class AppState: ObservableObject {
     }
 
     private func startWatching() {
-        fileWatcher?.stop()
+        Task { await fileWatcher?.stop() }
         guard let url = fileURL else { return }
-        fileWatcher = FileWatcher(url: url) { [weak self] in
+        let watcher = FileWatcher(url: url) { [weak self] in
             Task { @MainActor [weak self] in
                 self?.readFile()
             }
         }
-        fileWatcher?.start()
+        fileWatcher = watcher
+        Task { await watcher.start() }
     }
 }
