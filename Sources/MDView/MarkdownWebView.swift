@@ -10,19 +10,31 @@ struct MarkdownWebView: NSViewRepresentable {
         Coordinator()
     }
 
+    private static let resourceBundle: Bundle? = {
+        let candidates = [
+            Bundle.main.resourceURL?.appendingPathComponent("MDView_MDView.bundle"),
+            Bundle.main.bundleURL.appendingPathComponent("MDView_MDView.bundle"),
+        ]
+        for case let url? in candidates {
+            if let bundle = Bundle(url: url) {
+                return bundle
+            }
+        }
+        return nil
+    }()
+
     private static let stageDir: URL = {
         let fm = FileManager.default
         let dir = fm.temporaryDirectory.appendingPathComponent("mdview")
         try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
 
         Log.debug("stageDir: \(dir.path)")
-        Log.debug("Bundle.module.bundlePath: \(Bundle.module.bundlePath)")
-        Log.debug("Bundle.module.resourceURL: \(Bundle.module.resourceURL?.path ?? "nil")")
+        Log.debug("resourceBundle: \(resourceBundle?.bundlePath ?? "nil")")
 
         let htmlFile = dir.appendingPathComponent("index.html")
         try? HTMLTemplate.html.write(to: htmlFile, atomically: true, encoding: .utf8)
 
-        if let resourceDir = Bundle.module.resourceURL {
+        if let resourceDir = resourceBundle?.resourceURL {
             let contents = (try? fm.contentsOfDirectory(atPath: resourceDir.path)) ?? []
             Log.debug("resourceDir contents: \(contents)")
             for file in contents {
