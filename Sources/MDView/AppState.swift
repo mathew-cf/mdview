@@ -42,6 +42,19 @@ class AppState: ObservableObject {
         }
     }
 
+    @discardableResult
+    func openURL(_ url: URL) -> Bool {
+        var isDir: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir) else { return false }
+
+        if isDir.boolValue {
+            loadDirectory(url)
+        } else {
+            loadFile(url)
+        }
+        return true
+    }
+
     func loadFile(_ url: URL, changeDirectory: Bool = true) {
         fileURL = url
         fileName = url.lastPathComponent
