@@ -130,6 +130,16 @@ enum HTMLTemplate {
         vertical-align: middle;
     }
 
+    .find-highlight {
+        background-color: #fff3a8;
+        border-radius: 2px;
+        padding: 0 1px;
+    }
+    .find-highlight.find-current {
+        background-color: #ff9632;
+        color: #fff;
+    }
+
     .mermaid-container {
         display: flex;
         justify-content: center;
@@ -165,6 +175,8 @@ enum HTMLTemplate {
         th, td { border-color: #30363d; }
         tr:nth-child(2n) { background-color: #161b22; }
         #loading { color: #8b949e; }
+        .find-highlight { background-color: #625a2e; color: #e6edf3; }
+        .find-highlight.find-current { background-color: #c47616; color: #fff; }
     }
     </style>
     </head>
@@ -270,6 +282,96 @@ enum HTMLTemplate {
 
             show();
             window.scrollTo(0, scrollY);
+
+            if (_findQuery) findInPage(_findQuery);
+        };
+
+        /* ---- Find-in-page ---- */
+        var _findMarks = [];
+        var _findIndex = -1;
+        var _findQuery = '';
+
+        function clearFindMarks() {
+            for (var i = 0; i < _findMarks.length; i++) {
+                var mark = _findMarks[i];
+                var parent = mark.parentNode;
+                if (parent) {
+                    parent.replaceChild(document.createTextNode(mark.textContent), mark);
+                    parent.normalize();
+                }
+            }
+            _findMarks = [];
+            _findIndex = -1;
+        }
+
+        function updateCurrentHighlight() {
+            for (var i = 0; i < _findMarks.length; i++) {
+                _findMarks[i].className = (i === _findIndex) ? 'find-highlight find-current' : 'find-highlight';
+            }
+            if (_findIndex >= 0 && _findIndex < _findMarks.length) {
+                _findMarks[_findIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function result() {
+            return JSON.stringify({ total: _findMarks.length, current: _findIndex });
+        }
+
+        window.findInPage = function(query) {
+            clearFindMarks();
+            _findQuery = query || '';
+            if (!_findQuery) return result();
+
+            var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+            var nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+
+            var lower = _findQuery.toLowerCase();
+            for (var i = 0; i < nodes.length; i++) {
+                var node = nodes[i];
+                var text = node.textContent;
+                var lt = text.toLowerCase();
+                var pos = 0, frags = [], last = 0;
+                while ((pos = lt.indexOf(lower, pos)) !== -1) {
+                    if (pos > last) frags.push(document.createTextNode(text.substring(last, pos)));
+                    var mark = document.createElement('mark');
+                    mark.className = 'find-highlight';
+                    mark.textContent = text.substring(pos, pos + _findQuery.length);
+                    frags.push(mark);
+                    _findMarks.push(mark);
+                    last = pos + _findQuery.length;
+                    pos = last;
+                }
+                if (frags.length > 0) {
+                    if (last < text.length) frags.push(document.createTextNode(text.substring(last)));
+                    var parent = node.parentNode;
+                    for (var j = 0; j < frags.length; j++) parent.insertBefore(frags[j], node);
+                    parent.removeChild(node);
+                }
+            }
+            _findIndex = _findMarks.length > 0 ? 0 : -1;
+            updateCurrentHighlight();
+            return result();
+        };
+
+        window.findNext = function() {
+            if (_findMarks.length === 0) return result();
+            _findIndex = (_findIndex + 1) % _findMarks.length;
+            updateCurrentHighlight();
+            return result();
+        };
+
+        window.findPrev = function() {
+            if (_findMarks.length === 0) return result();
+            _findIndex = (_findIndex - 1 + _findMarks.length) % _findMarks.length;
+            updateCurrentHighlight();
+            return result();
+        };
+
+        window.clearFind = function() {
+            _findQuery = '';
+            clearFindMarks();
+            return result();
         };
     })();
     </script>

@@ -67,6 +67,14 @@ struct MDViewApp: App {
                 }
                 .keyboardShortcut("p")
             }
+            CommandGroup(after: .textEditing) {
+                Button("Find…") {
+                    Task { @MainActor in
+                        activeAppState()?.showFind()
+                    }
+                }
+                .keyboardShortcut("f")
+            }
             CommandGroup(after: .toolbar) {
                 Button("Reload") {
                     Task { @MainActor in

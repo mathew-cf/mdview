@@ -5,6 +5,7 @@ struct MarkdownWebView: NSViewRepresentable {
     let markdown: String
     let baseURL: URL?
     let zoomLevel: Double
+    weak var appState: AppState?
 
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -69,6 +70,7 @@ struct MarkdownWebView: NSViewRepresentable {
         webView.pageZoom = zoomLevel
         context.coordinator.webView = webView
         context.coordinator.baseURL = baseURL
+        appState?.webView = webView
 
         let htmlFile = Self.stageDir.appendingPathComponent("index.html")
         webView.loadFileURL(htmlFile, allowingReadAccessTo: URL(fileURLWithPath: "/"))

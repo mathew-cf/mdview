@@ -3,7 +3,7 @@
 A lightweight macOS app for reading Markdown files. Renders `.md` files with GitHub-flavored styling, syntax-highlighted code blocks, Mermaid diagrams, and live reload on file changes.
 
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-blue)
-![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange)
+![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 
 <p align="center">
@@ -14,6 +14,7 @@ A lightweight macOS app for reading Markdown files. Renders `.md` files with Git
 
 - **Live reload** -- automatically re-renders when the file changes on disk
 - **Quick Open** (`Cmd+P`) -- fuzzy-search any Markdown file in the current directory
+- **Find in page** (`Cmd+F`) -- search within the rendered document with match highlighting
 - **Drag & drop** -- drop a file or folder onto the window to open it
 - **Directory-aware** -- open a folder to browse all its Markdown files
 - **GitHub styling** -- light and dark themes that follow your system appearance
@@ -65,6 +66,7 @@ Inside the app:
 |----------|--------|
 | `Cmd+O` | Open a file or directory |
 | `Cmd+P` | Quick Open (fuzzy file search) |
+| `Cmd+F` | Find in page |
 | `Cmd+R` | Reload current file |
 | `Cmd++` | Zoom in |
 | `Cmd+-` | Zoom out |
@@ -83,6 +85,7 @@ Sources/MDView/
   DirectoryScanner.swift # Recursive Markdown file discovery with smart directory skipping
   FuzzyMatch.swift       # Fuzzy string matching with streak/boundary bonuses
   QuickOpenView.swift    # Cmd+P palette UI with keyboard navigation
+  FindBarView.swift      # Cmd+F find-in-page bar with match navigation
   Log.swift              # Debug logging (enabled via MDVIEW_DEBUG env var)
   Resources/
     marked.min.js        # Markdown parser (marked.js)

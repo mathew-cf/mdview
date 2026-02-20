@@ -10,13 +10,25 @@ struct ContentView: View {
                     MarkdownWebView(
                         markdown: appState.markdownContent,
                         baseURL: appState.fileURL?.deletingLastPathComponent(),
-                        zoomLevel: appState.zoomLevel
+                        zoomLevel: appState.zoomLevel,
+                        appState: appState
                     )
                 } else {
                     emptyState
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            if appState.isFindVisible {
+                FindBarView(
+                    isPresented: $appState.isFindVisible,
+                    webView: appState.webView
+                )
+                .padding(.top, 8)
+                .padding(.trailing, 24)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
 
             if appState.isQuickOpenVisible {
                 Color.black.opacity(0.15)

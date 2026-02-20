@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import WebKit
 
 @MainActor
 class AppState: ObservableObject {
@@ -9,7 +10,10 @@ class AppState: ObservableObject {
     @Published var directoryURL: URL?
     @Published var markdownFiles: [URL] = []
     @Published var isQuickOpenVisible = false
+    @Published var isFindVisible = false
     @Published var zoomLevel: Double = 1.0
+
+    weak var webView: WKWebView?
 
     private static let zoomStep = 0.1
     private static let minZoom = 0.5
@@ -87,6 +91,19 @@ class AppState: ObservableObject {
         }
         withAnimation(.easeOut(duration: 0.15)) {
             isQuickOpenVisible = true
+        }
+    }
+
+    func showFind() {
+        withAnimation(.easeOut(duration: 0.15)) {
+            isFindVisible = true
+        }
+    }
+
+    func hideFind() {
+        webView?.evaluateJavaScript("clearFind()") { _, _ in }
+        withAnimation(.easeOut(duration: 0.12)) {
+            isFindVisible = false
         }
     }
 
