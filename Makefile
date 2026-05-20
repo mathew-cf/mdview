@@ -14,7 +14,8 @@ bundle: icon
 	@mkdir -p "$(BUNDLE)/Contents/MacOS" "$(BUNDLE)/Contents/Resources"
 	cp "$(BIN_DIR)/$(APP_NAME)" "$(BUNDLE)/Contents/MacOS/"
 	cp -R "$(BIN_DIR)/MDView_MDView.bundle" "$(BUNDLE)/Contents/Resources/"
-	cp Info.plist "$(BUNDLE)/Contents/"
+	@BUILD_TS=$$(date +%Y%m%d.%H%M%S) && \
+	 sed 's|<string>1</string><!-- CFBundleVersion -->|<string>'"$$BUILD_TS"'</string><!-- CFBundleVersion -->|' Info.plist > "$(BUNDLE)/Contents/Info.plist"
 	@if [ -f "$(ICON_OUT)" ]; then cp "$(ICON_OUT)" "$(BUNDLE)/Contents/Resources/"; fi
 	codesign --force -s - "$(BUNDLE)"
 	@echo "✓ $(BUNDLE) is ready"

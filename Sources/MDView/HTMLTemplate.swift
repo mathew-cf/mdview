@@ -266,6 +266,13 @@ enum HTMLTemplate {
                         img.src = _baseDir + '/' + src;
                     }
                 });
+
+                content.querySelectorAll('a').forEach(function(a) {
+                    var href = a.getAttribute('href');
+                    if (href && !href.match(/^(https?:|data:|file:|mailto:|tel:|#)/i) && !href.startsWith('//')) {
+                        a.href = _baseDir + '/' + href;
+                    }
+                });
             }
 
             content.querySelectorAll('pre code').forEach(function(block) {

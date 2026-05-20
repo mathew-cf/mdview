@@ -69,14 +69,14 @@ class AppState: ObservableObject {
             let parentDir = url.deletingLastPathComponent()
             if directoryURL?.path != parentDir.path {
                 directoryURL = parentDir
-                markdownFiles = DirectoryScanner.scan(parentDir)
+                markdownFiles = []
             }
         }
     }
 
     func loadDirectory(_ url: URL) {
         directoryURL = url
-        markdownFiles = DirectoryScanner.scan(url)
+        markdownFiles = []
         Task { await fileWatcher?.stop() }
         fileWatcher = nil
         fileURL = nil

@@ -70,6 +70,7 @@ struct MarkdownWebView: NSViewRepresentable {
         webView.pageZoom = zoomLevel
         context.coordinator.webView = webView
         context.coordinator.baseURL = baseURL
+        context.coordinator.appState = appState
         appState?.webView = webView
 
         let htmlFile = Self.stageDir.appendingPathComponent("index.html")
@@ -95,6 +96,7 @@ struct MarkdownWebView: NSViewRepresentable {
     class Coordinator: NSObject, WKNavigationDelegate {
         var webView: WKWebView?
         var baseURL: URL?
+        weak var appState: AppState?
         private var pendingContent: String?
         private var isPageLoaded = false
 
@@ -129,19 +131,41 @@ struct MarkdownWebView: NSViewRepresentable {
             }
         }
 
-        // Allow navigation to links by opening in default browser
         func webView(
             _ webView: WKWebView,
             decidePolicyFor navigationAction: WKNavigationAction,
             decisionHandler: @escaping @MainActor @Sendable (WKNavigationActionPolicy) -> Void
         ) {
-            if navigationAction.navigationType == .linkActivated,
-               let url = navigationAction.request.url {
-                NSWorkspace.shared.open(url)
-                decisionHandler(.cancel)
-            } else {
+            guard navigationAction.navigationType == .linkActivated,
+                  let url = navigationAction.request.url else {
                 decisionHandler(.allow)
+                return
             }
+
+            // In-page anchor navigation (e.g. #heading)
+            if let fragment = url.fragment,
+               url.path == webView.url?.path {
+                let js = "document.getElementById('\(fragment.replacingOccurrences(of: "'", with: "\\'"))')?.scrollIntoView({behavior:'smooth'})"
+                webView.evaluateJavaScript(js) { _, _ in }
+                decisionHandler(.cancel)
+                return
+            }
+
+            // Local markdown file — open in MDView
+            if url.isFileURL {
+                let ext = url.pathExtension.lowercased()
+                if DirectoryScanner.markdownExtensions.contains(ext) {
+                    Task { @MainActor in
+                        self.appState?.loadFile(url)
+                    }
+                    decisionHandler(.cancel)
+                    return
+                }
+            }
+
+            // Everything else — open in default browser/app
+            NSWorkspace.shared.open(url)
+            decisionHandler(.cancel)
         }
     }
 }
